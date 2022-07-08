@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Grabcut Demo</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    />
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/2.7.0/fabric.min.js"></script>
+    <script
+      type="text/javascript"
+      src="{{ url_for('static', filename='js/grabcut.js') }}"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{{ url_for('static', filename='js/grabcut_demo.js') }}"
+    ></script>
+    <style type="text/css">
+      .grabcut_res {
+        max-height: 300px;
+        max-width: 300px;
+        background-color: grey;
+      }
+      .grabcut_row {
+        border: 1px solid grey;
+        border-radius: 15px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+        margin: 15px;
+      }
+      .title {
+        padding: 15px;
+        font-weight: bold;
+      }
+      .header {
+        background-color: #c5ddfd;
+        padding: 10px;
+      }
+      .h_text {
+        font-weight: bold;
+        font-size: 30px;
+      }
+      .invisible {
+        visibility: hidden;
+      }
+      .visible {
+        visibility: visible;
+      }
+      #preview img {
+      width: 100px;
+      height: 100px;
+    }
+    </style>
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <a href="/">Home</a>
+      <nav class="navbar navbar-light bg-light header">
+        <span class="navbar-brand mb-0 h_text"
+          >Предварительная обработка фотографий аппаратуры</span
+        >
+      </nav>
+      <div id="start">
+        <center>
+          Создание новой панели
+          <br />
+          <br />
+          Введите название панели:
+          <input type="text" id="panel_name" value="" />
+          <br />
+          <br />
+          Выберите изображение панели:
+          <input type="file" id="upload" onchange="readURL(this);" />
+          <br />
+          <br />
+          <div id="preview"></div>
+          <br />
+          <br />
+          <input type="button" id="go" value="Finish" />
+        </center>
+      </div>
+      <div id="appending_container" class="invisible"></div>
+      <script>
+        $("#btn1").click(function () {
+          $("#appending_container").toggleClass("visible");
+          window.open("/create", "_self");
+        });
+
+        $("#btn2").click(function () {
+          $("#appending_container").toggleClass("visible");
+        });
+
+        $("#image_path").click(function (a, b, c) {
+          console.log(a, b, c);
+        });
+
+        function readURL(input) {
+          if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+              $("#preview").attr("src", e.target.result);
+            };
+            reader.readAsDataURL(input.files[0]);
+          }
+        }
+        (function() {
+      var inpElem = document.getElementById('upload'),
+          divElem = document.getElementById('preview');
+      
+      inpElem.addEventListener("change", function(e) {
+          preview(this.files[0]);
+      });
+      
+      function preview(file) {
+        if ( file.type.match(/image.*/) ) {
+          var reader = new FileReader(), img;
+          
+          reader.addEventListener("load", function(event) {
+            img = document.createElement('img');
+            img.width = 400
+            img.height = 300
+            img.src = event.target.result;
+
+            divElem.appendChild(img);
+          });
+          
+          reader.readAsDataURL(file);
+        }
+      }
+    })();
+      </script>
+    </div>
+  </body>
+</html>

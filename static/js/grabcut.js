@@ -1,16 +1,15 @@
-canvas_width = window.screen.width
+canvas_width = window.screen.width;
 
-
-function getIdNumber(){
-    let x = Math.floor((Math.random() * 10000) );
-    if(x<1000){
-        x=x+1000 
-    }
-    return x
+function getIdNumber() {
+  let x = Math.floor(Math.random() * 10000);
+  if (x < 1000) {
+    x = x + 1000;
+  }
+  return x;
 }
 
-function getGrabcutCanvasId(id, canvas_num){
-    return "grabcut_"+id+"_canvas_"+canvas_num
+function getGrabcutCanvasId(id, canvas_num) {
+  return "grabcut_" + id + "_canvas_" + canvas_num;
 }
 
 async function makeProbableForegroundFabricCanvas(myCanvasObj, appendToCol){
@@ -119,53 +118,51 @@ async function makeProbableForegroundFabricCanvas(myCanvasObj, appendToCol){
         });
         canvas.add(rect);
     });
+    canvas.add(rect);
+  });
 
-    canvas.on('mouse:move', function(o){
-        if(hasRect) return; // do nothing if there is already a rect
+  canvas.on("mouse:move", function (o) {
+    // if(hasRect) return; // do nothing if there is already a rect
 
-        if (!isDown) return;
-        var pointer = canvas.getPointer(o.e);
-        
-        if(origX>pointer.x){
-            rect.set({ left: Math.abs(pointer.x) });
-        }
-        if(origY>pointer.y){
-            rect.set({ top: Math.abs(pointer.y) });
-        }
-        
-        rect.set({ width: Math.abs(origX - pointer.x) });
-        rect.set({ height: Math.abs(origY - pointer.y) });
-        
-        
-        canvas.renderAll();
-    });
+    if (!isDown) return;
+    var pointer = canvas.getPointer(o.e);
 
-    canvas.on('mouse:up', function(o){
-        if(hasRect) return; // do nothing if there is already a rect
-        isDown = false;
-        canvas.getActiveObject().setCoords()
-        canvas.renderAll();
+    if (origX > pointer.x) {
+      rect.set({ left: Math.abs(pointer.x) });
+    }
+    if (origY > pointer.y) {
+      rect.set({ top: Math.abs(pointer.y) });
+    }
 
-        hasRect = true // indicate that a rectangle has been drawn
-        myCanvasObj.ready = true
-    });
+    rect.set({ width: Math.abs(origX - pointer.x) });
+    rect.set({ height: Math.abs(origY - pointer.y) });
 
-    return canvas
+    canvas.renderAll();
+  });
 
+  canvas.on("mouse:up", function (o) {
+    // if(hasRect) return; // do nothing if there is already a rect
+    isDown = false;
+    canvas.getActiveObject().setCoords();
+    canvas.renderAll();
 
+    hasRect = true; // indicate that a rectangle has been drawn
+    myCanvasObj.ready = true;
+  });
+
+  return canvas;
 }
 
 // function makeBackgroundDrawingFabricCanvas(myCanvasObj, appendToCol) {
 //     console.log("1")
 //     let canvas_id = myCanvasObj.id
-//     let canvas_html = $("<canvas>")        
+//     let canvas_html = $("<canvas>")
 //     $(canvas_html).attr("id", canvas_id)
 //     $(canvas_html).attr("height", canvas_height)
 //     $(canvas_html).attr("width", canvas_width)
-//     $(appendToCol).append(canvas_html) 
-    
-//     var canvas = new fabric.Canvas(canvas_id);
+//     $(appendToCol).append(canvas_html)
 
+//     var canvas = new fabric.Canvas(canvas_id);
 
 //     canvas.isDrawingMode = true
 //     canvas.freeDrawingBrush.color = "green";
@@ -173,7 +170,7 @@ async function makeProbableForegroundFabricCanvas(myCanvasObj, appendToCol){
 
 //     let add_back_detail_button = $("<button class='btn btn-primary'>Add Back Detail</button>")
 //     $(appendToCol).append(add_back_detail_button)
-//     $(add_back_detail_button).click(function(){ 
+//     $(add_back_detail_button).click(function(){
 //         grabCutRefinement_Add(canvas_3_add, obj, canvas4_id, obj.image.original_image)
 //     })
 
@@ -217,36 +214,34 @@ async function makeDrawingFabricCanvas(myCanvasObj, appendToCol,color) {
     var canvas = new fabric.Canvas(canvas_id);
 
 
-    canvas.isDrawingMode = true
-    canvas.freeDrawingBrush.color = color;
-    canvas.freeDrawingBrush.width = 1;
+  var canvas = new fabric.Canvas(canvas_id);
 
+  canvas.isDrawingMode = true;
+  canvas.freeDrawingBrush.color = color;
+  canvas.freeDrawingBrush.width = 1;
 
-    //set Background Images for the Fabric Canvases     
-    fabric.Image.fromURL(myCanvasObj.imageURL, function(img) {
-        let original_height = img._originalElement.height
-        let original_width = img._originalElement.width
+  //set Background Images for the Fabric Canvases
+  fabric.Image.fromURL(myCanvasObj.imageURL, function (img) {
+    let original_height = img._originalElement.height;
+    let original_width = img._originalElement.width;
 
-        let scale_determine = original_height > original_width ? original_height : original_width
-        let scale_factor = canvas_width/scale_determine    //original_width
+    let scale_determine =
+      original_height > original_width ? original_height : original_width;
+    let scale_factor = canvas_width / scale_determine; //original_width
 
-        myCanvasObj.scale_factor = scale_factor
+    myCanvasObj.scale_factor = scale_factor;
 
-        //obj.image.img = fabric.util.object.clone(img)
-        myCanvasObj.img_height = original_height * scale_factor
-        myCanvasObj.img_width = original_width * scale_factor
+    //obj.image.img = fabric.util.object.clone(img)
+    myCanvasObj.img_height = original_height * scale_factor;
+    myCanvasObj.img_width = original_width * scale_factor;
 
-        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), { 
-           scaleX: scale_factor,
-           scaleY: scale_factor,
-           
-        });
+    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+      scaleX: scale_factor,
+      scaleY: scale_factor,
+    });
+  });
 
-     });
-
-
-
-    return canvas
+  return canvas;
 }
 
 async function makeGrabCutRow(appending_container, imageURL, project_name) {
@@ -457,79 +452,76 @@ function refine_grabcut(img_file, bg_drawing_canvas, fg_drawing_canvas, obj, rec
 }
 
 function get_active_rect_of_canvas(fabric_canvas) {
-    let active = fabric_canvas.getActiveObject()
-    if(active) {
-        let left = active.left
-        let top = active.top
-        let width = active.width * active.scaleX
-        let height = active.height * active.scaleY
+  let active = fabric_canvas.getActiveObject();
+  if (active) {
+    let left = active.left;
+    let top = active.top;
+    let width = active.width * active.scaleX;
+    let height = active.height * active.scaleY;
 
-
-      return  {
-            'left' : left,
-            'top' : top,
-            'width' : width,
-            'height' : height
-        }
-
-    
-    } else {
-        console.log("no Fabric rect")
-    }
-    return {}
+    return {
+      left: left,
+      top: top,
+      width: width,
+      height: height,
+    };
+  } else {
+    console.log("no Fabric rect");
+  }
+  return {};
 }
 
-
-// 
+//
 // rect_cord are the coordinates of the rectangl
 // where is the id of the div to append the returned image to.
 //div_id
-function do_grabcut_backend(img_file, rect_coords,  where, div_id, obj){ //} project_name, row_id) {
-    $(where).empty()
-    var loading_img = $("<div id='loading_" +div_id +"'>")
-		$(loading_img).append("<img src='../static/ajax-loader.gif'>")
-		$(loading_img).addClass('loading_gif')
-		$(where).append(loading_img)
-    var send = {
-        'img_file' : img_file,
-        'project_name': obj.project_name,
-        'row_id': obj.id,
-        'rect_coords' : rect_coords,
-    }
-    console.log(send)
-    $.ajax({
-        url: '../do_grabcut',
-        type: 'POST',
-        data: JSON.stringify(send),
-        contentType: 'application/json; charset=UTF-8',
-        dataType: 'json',
-        success: function (result) {
-            console.log(result)
-            file_name = result['saved_file'] 
-            obj.canvas2.imageURL = file_name
-            append_grabcut_result(file_name, where, div_id)
-        },
-        error: function (request, status, error) {
-          console.log("Error");
-          console.log(request)
-          console.log(status)
-          console.log(error)
-        }
-    });
+function do_grabcut_backend(img_file, rect_coords, where, div_id, obj) {
+  //} project_name, row_id) {
+  $(where).empty();
+  var loading_img = $("<div id='loading_" + div_id + "'>");
+  $(loading_img).append("<img src='../static/ajax-loader.gif'>");
+  $(loading_img).addClass("loading_gif");
+  $(where).append(loading_img);
+  var send = {
+    img_file: img_file,
+    project_name: obj.project_name,
+    row_id: obj.id,
+    rect_coords: rect_coords,
+  };
+  console.log(send);
+  $.ajax({
+    url: "../do_grabcut",
+    type: "POST",
+    data: JSON.stringify(send),
+    contentType: "application/json; charset=UTF-8",
+    dataType: "json",
+    success: function (result) {
+      console.log(result);
+      file_name = result["saved_file"];
+      obj.canvas2.imageURL = file_name;
+      append_grabcut_result(file_name, where, div_id);
+    },
+    error: function (request, status, error) {
+      console.log("Error");
+      console.log(request);
+      console.log(status);
+      console.log(error);
+    },
+  });
 }
 
 function append_grabcut_result(file_name, where, div_id) {
-    $("#loading_" + div_id).remove()
-    var gc_img = $("<img>")
-    $(gc_img).attr('src', file_name)
-    $(gc_img).addClass('grabcut_res')
-    $(where).empty()
-    $(where).append(gc_img)
+  $("#loading_" + div_id).remove();
+  var gc_img = $("<img>");
+  $(gc_img).attr("src", file_name);
+  $(gc_img).addClass("grabcut_res");
+  $(where).empty();
+  $(where).append(gc_img);
 }
 
 function clear_canvas(canvas) {
-    var objects = canvas.getObjects()
-    for(var i=0; i<objects.length; i++){
-        canvas.remove(objects[i])
-    }
+  var objects = canvas.getObjects();
+  for (var i = 0; i < objects.length; i++) {
+    canvas.remove(objects[i]);
+  }
 }

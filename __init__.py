@@ -1,6 +1,5 @@
 import os
-import json
-from flask import Flask, request, render_template, g, redirect, Response, url_for, session, send_from_directory
+from flask import Flask, request, render_template
 from flask import jsonify
 import json
 from grabcut import *
@@ -8,12 +7,38 @@ from grabcut import *
 abs_path ='./'
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-app = Flask(__name__, template_folder=tmpl_dir)
+app = Flask(__name__, template_folder=tmpl_dir, )
 
 
 @app.route('/')
-def home():
-    return render_template("grabcut_demo.html")
+def grabcut():
+    return render_template("start.html")
+    # return render_template("grabcut_demo.html")
+
+@app.route('/create')
+def create():
+    return render_template("create.html")
+
+@app.route('/start')
+def start():
+    return render_template("start.html")
+
+@app.route('/load')
+def load():
+  # Fetch panels data
+  return "TODO"
+
+@app.route('/edit')
+def edit():
+  # Main app
+  return render_template("grabcut_demo.html")
+
+@app.route('/create/new', methods=['POST'])
+def add_new_panel():
+  # Create new panel in Panels table
+  # Saving image to Images table
+  # Return Panel id
+  return "{}"
 
 @app.route('/do_grabcut', methods=['POST'])
 def do_grabcut():
@@ -63,4 +88,4 @@ def cal_rect_coords(rect_coords):
   return rect_coords
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=80)

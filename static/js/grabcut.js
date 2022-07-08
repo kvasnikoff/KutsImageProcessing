@@ -13,26 +13,40 @@ function getGrabcutCanvasId(id, canvas_num){
     return "grabcut_"+id+"_canvas_"+canvas_num
 }
 
-function makeProbableForegroundFabricCanvas(myCanvasObj, appendToCol){
-    canvas_height = 1080;
+async function makeProbableForegroundFabricCanvas(myCanvasObj, appendToCol){
+    canvas_height = 1080; // далее меняется на основе изображения
+
+    function getImageHeight() {
+        return new Promise((resolve, reject) => {
+            fabric.Image.fromURL(myCanvasObj.imageURL, function(img) {
+                if (img._element == null) {
+                    reject("no!!!!");
+                }
+                else {
+                    console.log("error")
+                    resolve(img._originalElement.height * (canvas_width / img._originalElement.width));
+                }
+            });
+        });
+    }
+
+    try {
+        canvas_height = await getImageHeight();
+    }
+    catch(err) {
+        console.log(err);
+    }// принудительно синхронно узнаем высоту перед созданием канваса (так как открытие фото - асинхронная операция)
+
+
     fabric.Image.fromURL(myCanvasObj.imageURL, function(img) {
         console.log("yoyo1")
         let original_height = img._originalElement.height
         let original_width = img._originalElement.width
         let scale_determine = original_height > original_width ? original_height : original_width
         canvas_height = img._originalElement.height * (canvas_width/scale_determine)
-        console.log(canvas_height)
-        console.log(img._originalElement.height * (canvas_width/scale_determine))
-        console.log("yoyo2")
 
         let canvas1_id = myCanvasObj.id
     });
-    console.log("nice")
-    console.log("try")
-
-    console.log("yoyo")
-    console.log(canvas_height)
-    console.log("yoyo")
 
 
     let canvas1_id = myCanvasObj.id
@@ -165,7 +179,33 @@ function makeProbableForegroundFabricCanvas(myCanvasObj, appendToCol){
 
 // }
 
-function makeDrawingFabricCanvas(myCanvasObj, appendToCol,color) {
+async function makeDrawingFabricCanvas(myCanvasObj, appendToCol,color) {
+
+        canvas_height = 1080;
+
+    function getImageHeight() {
+        return new Promise((resolve, reject) => {
+            fabric.Image.fromURL(myCanvasObj.imageURL, function(img) {
+                if (img._element == null) {
+                    reject("no!!!!");
+                }
+                else {
+                    console.log("error")
+                    resolve(img._originalElement.height * (canvas_width / img._originalElement.width));
+                }
+            });
+        });
+    }
+
+    try {
+        canvas_height = await getImageHeight();
+    }
+    catch(err) {
+        console.log(err);
+    }// принудительно синхронно узнаем высоту перед созданием канваса (так как открытие фото - асинхронная операция)
+
+
+
     console.log("2")
     let canvas_id = myCanvasObj.id
     let canvas_html = $("<canvas>")        
@@ -209,7 +249,7 @@ function makeDrawingFabricCanvas(myCanvasObj, appendToCol,color) {
     return canvas
 }
 
-function makeGrabCutRow(appending_container,imageURL, project_name) {
+async function makeGrabCutRow(appending_container, imageURL, project_name) {
     let id = getIdNumber()
 
 
@@ -229,14 +269,14 @@ function makeGrabCutRow(appending_container,imageURL, project_name) {
         refinement_canvas: {},
         refinement_output: {} //to store the output file name after grabcut
 
-        }
+    }
 
     // CREATE FRAMRWORK FOR ALL CANVASES 
     let new_row = $("<div class='row grabcut_row'>")
     let col1 = $("<div class='row'>") // ТУТ было div class='col-md-3', исправил на row
     let col2 = $("<div class='row'>")
     let col3 = $("<div class='row'>")
-    let col4 =$("<div class='row'>")
+    let col4 = $("<div class='row'>")
 
 
     let title_container = $("<div class='col-md-12'>")
@@ -244,7 +284,7 @@ function makeGrabCutRow(appending_container,imageURL, project_name) {
     let title1 = $("<div class='row'>")
     let title2 = $("<div class='row'>")
     let title3 = $("<div class='row'>")
-    let title4 =$("<div class='row'>")
+    let title4 = $("<div class='row'>")
     $(title1).append("<div class='title'>1. Выделите фрагмент для работы <br></div>")
     // $(title2).append("<div class='title'>Result of grabcut with rectangle:</div>")
     $(title2).append("<div class='title'>2. Выделите то, что точно не нужно вырезать.<br> 3. Выделите то, что точно нужно вырезать.</div>")
@@ -255,12 +295,12 @@ function makeGrabCutRow(appending_container,imageURL, project_name) {
 
     $(new_row).append(title1).append(col1).append(title2).append(col3).append(title3).append(col4)
     // $("#"+appending_container).append("Row id: "  +id + " Grabcut outputs for this row can be found in the directory interactive_grabcut/static/images/~project_name~/" + id )
-    $("#"+appending_container).append(new_row)
+    $("#" + appending_container).append(new_row)
 
     //CREATE ROW 1 (Fabric cancas for drawing)
     let canvas1_id = getGrabcutCanvasId(id, "1")
     obj.canvas1 = {
-        type: "fabric_canvas",            
+        type: "fabric_canvas",
         id: canvas1_id,
         imageURL: imageURL,
         scale_factor: 1, //default of no scaling factor
@@ -270,16 +310,18 @@ function makeGrabCutRow(appending_container,imageURL, project_name) {
 
     }
 
-
     $
+    try {
+        var fg_fabric_canvas = await makeProbableForegroundFabricCanvas(obj.canvas1, col1 /*append to col1 */)
+    } catch (err) {
+        console.log(err)
+    }
 
-
-    var fg_fabric_canvas = makeProbableForegroundFabricCanvas(obj.canvas1, col1 /*append to col1 */)
 
     let do_grabcut_button = $("<button class='btn btn-primary'>Run grabcut &nbsp <span class= 'glyphicon glyphicon-scissors'></span></button>")
     //$(col1).append(do_grabcut_button)
-    $(do_grabcut_button).click(function(){ 
-        if(!obj.canvas1.ready){
+    $(do_grabcut_button).click(function () {
+        if (!obj.canvas1.ready) {
             alert("Please draw a rectangle")
             return
         }
@@ -287,15 +329,15 @@ function makeGrabCutRow(appending_container,imageURL, project_name) {
         var rect_1 = get_active_rect_of_canvas(fg_fabric_canvas)
         rect_1.scale_factor = obj.canvas1.scale_factor
 
-        let row_id = id        
-        do_grabcut_backend(imageURL.replace("../static/images/", ""),  rect_1 , col2, appending_container, obj)
+        let row_id = id
+        do_grabcut_backend(imageURL.replace("../static/images/", ""), rect_1, col2, appending_container, obj)
 
     })
 
     let canvas2_id = getGrabcutCanvasId(id, "2")
 
     obj.canvas2 = {
-        type: "fabric_canvas",            
+        type: "fabric_canvas",
         id: canvas2_id,
         imageURL: imageURL,
         scale_factor: 1, //default of no scaling factor
@@ -305,7 +347,7 @@ function makeGrabCutRow(appending_container,imageURL, project_name) {
     }
 
     obj.refinement_canvas = {
-        type: "fabric_canvas",            
+        type: "fabric_canvas",
         id: canvas2_id,
         imageURL: imageURL,
         scale_factor: 1, //default of no scaling factor
@@ -316,42 +358,47 @@ function makeGrabCutRow(appending_container,imageURL, project_name) {
 
     let canvas3_id = getGrabcutCanvasId(id, "3")
     obj.fg_canvas = {
-        type: "fabric_canvas",            
+        type: "fabric_canvas",
         id: canvas3_id,
         imageURL: imageURL,
         scale_factor: 1, //default of no scaling factor
         img_height: "",
         img_width: "",
-        original_image: "", 
+        original_image: "",
     }
-    
+    try {
+        bg_drawing_canvas = await makeDrawingFabricCanvas(obj.refinement_canvas, col3, "black")
+    } catch (err) {
+        console.log(err)
+    }
 
+    try {
+        fg_drawing_canvas = await makeDrawingFabricCanvas(obj.fg_canvas, col3, "blue")
+    } catch (err) {
+        console.log(err)
+    }
 
-    let bg_drawing_canvas = makeDrawingFabricCanvas(obj.refinement_canvas, col3, "black")
+    let add_back_detail_button = $("<button class='btn btn-primary'>Run grabcut refinement</button>")
+    $(col4).append(add_back_detail_button)
+    $(add_back_detail_button).click(function () {
+        //error checking for when there's no rectangle drawn on the first canvas
+        if (!obj.canvas1.ready) {
 
-    let fg_drawing_canvas = makeDrawingFabricCanvas(obj.fg_canvas, col3,"blue")
+            alert("Please draw a rectangle first")
+            return
+        }
+        var rect_1 = get_active_rect_of_canvas(fg_fabric_canvas)
+        rect_1.scale_factor = obj.canvas1.scale_factor
 
-        let add_back_detail_button = $("<button class='btn btn-primary'>Run grabcut refinement</button>")
-        $(col3).append(add_back_detail_button)
-        $(add_back_detail_button).click(function(){
-            //error checking for when there's no rectangle drawn on the first canvas
-            if(!obj.canvas1.ready){
+        refine_grabcut(imageURL.replace("../static/images/", ""), bg_drawing_canvas, fg_drawing_canvas, obj, rect_1, col4, appending_container)
+    })
 
-                alert("Please draw a rectangle first")
-                return
-            } 
-            var rect_1 = get_active_rect_of_canvas(fg_fabric_canvas)
-            rect_1.scale_factor = obj.canvas1.scale_factor
-    
-            refine_grabcut(imageURL.replace("../static/images/", ""),bg_drawing_canvas, fg_drawing_canvas, obj, rect_1, col4, appending_container)
-        })
-
-        let clear_canvas_button = $("<button class='btn btn-primary'>Clear Drawings</button>")
-        $(col3).append("<span>&nbsp&nbsp&nbsp&nbsp</span>").append(clear_canvas_button)
-        $(clear_canvas_button).click(function(){ 
-           clear_canvas(bg_drawing_canvas)
-           clear_canvas(fg_drawing_canvas)
-        })
+    let clear_canvas_button = $("<button class='btn btn-primary'>Clear Drawings</button>")
+    $(col4).append("<span>&nbsp&nbsp&nbsp&nbsp</span>").append(clear_canvas_button)
+    $(clear_canvas_button).click(function () {
+        clear_canvas(bg_drawing_canvas)
+        clear_canvas(fg_drawing_canvas)
+    })
 
     return obj
 }
@@ -362,8 +409,13 @@ function refine_grabcut(img_file, bg_drawing_canvas, fg_drawing_canvas, obj, rec
     $(loading_img).append("<img src='../static/ajax-loader.gif'>")
     $(loading_img).addClass('loading_gif')
     $(where).append(loading_img)
+
+
     //get objects from drawing canvas, send paths to backend
+
+
     let lines = bg_drawing_canvas.getObjects()
+
     var bg_drawing = {
         'lines' : lines,
         'scale_factor' : obj.refinement_canvas.scale_factor,

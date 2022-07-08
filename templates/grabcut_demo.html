@@ -15,11 +15,11 @@
           background-color: grey;
         }
         .grabcut_row {
-          border: 1px solid grey;
+          border: 0px solid grey;
           border-radius: 15px;
           padding-top: 20px;
           padding-bottom: 20px;
-          margin: 15px;
+          margin: 0px;
         }
         .title {
           padding: 15px;
@@ -33,6 +33,12 @@
           font-weight: bold;
           font-size: 30px;
         }
+        .invisible {
+          visibility: hidden;
+        }
+        .visible {
+          visibility: visible ;
+        }
       </style>
     </head>
 
@@ -40,8 +46,31 @@
       <div class="container-fluid">
           <nav class="navbar navbar-light bg-light header">
               <span class="navbar-brand mb-0 h_text">Предварительная обработка фотографий аппаратуры</span>
-            </nav>
-        <div id="appending_container"></div>
+          </nav>
+          <div id="start">
+           <center>
+              Начало работы
+              <br>
+              <br>
+              <input type="button" id="btn1" value="Создать новую коробку" />
+              <br>
+              <br>
+              <input type="button" id="btn2" value="Выбрать из существующих" />
+           </center>
+
+            
+          </div>
+        <div id="appending_container" class="invisible"></div>
+        <script>
+          $("#btn1").click(function(){
+              $("#appending_container").toggleClass("visible");
+              window.open("/create","_self")
+          });
+          
+          $("#btn2").click(function(){
+              $("#appending_container").toggleClass("visible");
+          });
+        </script>
     </div>
     </body>
 
